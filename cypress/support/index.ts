@@ -13,6 +13,12 @@ export const ScrapeCoaches = (url: string, school: string, sport: string) => {
   cy.get(`.sidearm-coaches-coach`).then(el => {
     cy.log(`Coaches found: ${JSON.stringify(el.length)}`)
 
+    cy.get('body')
+      .then(($body) => {
+        $body.find(`#google_image_div`).css('display', 'none')
+        $body.find(`.GoogleActiveViewElement`).css('display', 'none')
+        $body.find(`.img_ad`).css('display', 'none')
+      })
     // Loop through all of the coaches
     for (let i = 0; i < el.length; i++) {
       cy.get('.sidearm-coaches-coach').eq(i).then(el => {
@@ -34,6 +40,7 @@ export const ScrapeCoaches = (url: string, school: string, sport: string) => {
                 $body.find('nav').css('display', 'none')
                 $body.find('.main-header').css('display', 'none')
                 $body.find('.sidearm-alerts').css('display', 'none')
+                $body.find(`#google_image_div`).css('display', 'none')
 
                 // image was found, take a screenshot
                 cy.get(`.sidearm-coach-bio-image > img`).should(`be.visible`).screenshot(`${school}/${sport}/${coachName}`, { scale: false })
