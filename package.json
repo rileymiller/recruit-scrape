@@ -1,0 +1,18 @@
+{
+  "name": "recruit-scrape",
+  "version": "1.0.0",
+  "description": "A webscraping tool for recruiting",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "cypress": "cypress"
+  },
+  "author": "Riley Miller",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "cypress": "^6.8.0"
+  }
+}
