@@ -2,6 +2,8 @@
 
 cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../..;
 
+STARTTIME=$(date +%s)
+
 echo "Cleaning Workspace"
 
 rm -r build/
@@ -25,4 +27,6 @@ echo "INFO: finished scraping, running postRun"
 
 ./scripts/postRun.sh
 
+ENDTIME=$(date +%s)
 
+echo "${@} scrape completed in $((ENDTIME - STARTTIME)) seconds"
