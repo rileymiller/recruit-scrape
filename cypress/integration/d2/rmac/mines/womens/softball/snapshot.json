@@ -1,0 +1,21 @@
+[
+  {
+    "coachName": "Tara Wheeler",
+    "Title": "Interim Head Coach",
+    "Email": "twheeler@mines.edu",
+    "Phone": "303-273-3937"
+  },
+  {
+    "coachName": "Barbara Duran",
+    "Title": "Assistant Coach",
+    "Phone": "303-273-3937"
+  },
+  {
+    "coachName": "Kelsey Buechler",
+    "Title": "Student Assistant Coach"
+  },
+  {
+    "coachName": "Kaelene Curry",
+    "Title": "Assistant Coach"
+  }
+]

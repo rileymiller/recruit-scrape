@@ -1,4 +1,14 @@
+import * as fs from 'fs'
 
+type ScrapeConfig = {
+  url: string
+  division: string
+  conference: string
+  school: string
+  gender: 'mens' | 'womens'
+  sport: string
+  path: string
+}
 /**
  * Function to scrape a sidearm sports coaches page
  * 
@@ -6,7 +16,10 @@
  * @param school 
  * @param sport 
  */
-export const ScrapeCoaches = (url: string, school: string, sport: string) => {
+export const ScrapeCoaches = (config: ScrapeConfig) => {
+  const { url, division, conference, school, gender, sport, path } = config
+
+  cy.log(`Path: ${path}`)
   // go to the scraping url
   cy.visit(url)
 
@@ -45,35 +58,41 @@ export const ScrapeCoaches = (url: string, school: string, sport: string) => {
 
           cy.log(`Coach Name: ${coachName}`)
 
-          // Take a screenshot of the coaches bio picture
-          cy.get('body')
-            .then(($body) => {
+          if (Cypress.env('write_images')) {
+            // Take a screenshot of the coaches bio picture
+            cy.get('body')
+              .then(($body) => {
 
-              // synchronously query from body
-              // to check if the coach has an image
-              if ($body.find('.sidearm-coach-bio-image > img').length) {
+                // synchronously query from body
+                // to check if the coach has an image
+                if ($body.find('.sidearm-coach-bio-image > img').length) {
 
-                // Remove some obfuscating elements
-                $body.find('nav').css('display', 'none')
-                $body.find('.main-header').css('display', 'none')
-                $body.find('.sidearm-alerts').css('display', 'none')
-                $body.find(`#google_image_div`).css('display', 'none')
+                  // Remove some obfuscating elements
+                  $body.find('nav').css('display', 'none')
+                  $body.find('.main-header').css('display', 'none')
+                  $body.find('.sidearm-alerts').css('display', 'none')
+                  $body.find(`#google_image_div`).css('display', 'none')
 
-                // Remove whitespace from the coach's name for the image file path
-                const formattedCoachName = coachName.replace(/\s/g, "")
-                const imagePath = `images/${formattedCoachName}`
+                  // Remove whitespace from the coach's name for the image file path
+                  const formattedCoachName = coachName.replace(/\s/g, "")
+                  const imagePath = `images/${formattedCoachName}`
 
-                // image was found, take a screenshot
-                cy.get(`.sidearm-coach-bio-image > img`).should(`be.visible`).screenshot(`${school}/${sport}/${formattedCoachName}`, { scale: false })
+                  const screenshotPath = `${division}/${conference}/${school}/${gender}/${sport}/${formattedCoachName}`
 
-                coachDTO = {
-                  ...coachDTO,
-                  imagePath: `${imagePath}.png`
+                  // image was found, take a screenshot
+                  cy.get(`.sidearm-coach-bio-image > img`).should(`be.visible`).screenshot(screenshotPath, { scale: false })
+
+                  coachDTO = {
+                    ...coachDTO,
+                    imagePath: `${imagePath}.png`
+                  }
+                } else {
+                  cy.log(`No image for coach: ${coachName}`)
                 }
-              } else {
-                cy.log(`No image for coach: ${coachName}`)
-              }
-            })
+              })
+          } else {
+            cy.log(`write_images set to false, skipping grabbing images`)
+          }
         })
 
         // scrape the coaches bio information
@@ -119,6 +138,27 @@ export const ScrapeCoaches = (url: string, school: string, sport: string) => {
     }
   }).then(_ => {
     cy.log(JSON.stringify(coaches))
-    cy.writeFile(`build/${school}/${sport}/coaches.json`, coaches)
+
+
+    cy.writeFile(`build/${division}/${conference}/${school}/${gender}/${sport}/coaches.json`, coaches)
+
+    if (Cypress.env('update_snapshots')) {
+      const reducedCoaches = coaches.map(coach => {
+        delete coach.imagePath
+        return coach
+      })
+      cy.writeFile(`${path}/snapshot.json`, reducedCoaches)
+    } else {
+      cy.log(`update_snapshots set to false, skipping snapshot update`)
+    }
+
+    // Assert that the coaches object has not changed
+    cy.readFile(`${path}/snapshot.json`).then(snapshot => {
+      const reducedCoaches = coaches.map(coach => {
+        delete coach.imagePath
+        return coach
+      })
+      expect(reducedCoaches).to.deep.equal(snapshot)
+    })
   })
 }
