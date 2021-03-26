@@ -1,0 +1,46 @@
+[
+  {
+    "coachName": "Kathy Delaney-Smith",
+    "Title": "The Friends of Harvard Women's Basketball Head Coach",
+    "Email": "harvardwbb@fas.harvard.edu",
+    "Phone": "(617) 495-2214"
+  },
+  {
+    "coachName": "Mike Roux",
+    "Title": "Associate Head Coach",
+    "Email": "mroux@fas.harvard.edu",
+    "Phone": "(617) 495-2214"
+  },
+  {
+    "coachName": "Jasmine Sborov",
+    "Title": "Assistant Coach",
+    "Email": "jsborov@fas.harvard.edu",
+    "Phone": "(617) 495-2214"
+  },
+  {
+    "coachName": "Lindsay Werner",
+    "Title": "Assistant Coach",
+    "Email": "lwerner@fas.harvard.edu",
+    "Phone": "(617) 495-2214"
+  },
+  {
+    "coachName": "Heidi Banks",
+    "Title": "Director of Basketball Operations",
+    "Email": "hbanks@fas.harvard.edu",
+    "Phone": "(617) 495-2214"
+  },
+  {
+    "coachName": "Laura Barnard",
+    "Title": "Coordinator of Marketing and Program Development"
+  },
+  {
+    "coachName": "Kat Wright",
+    "Title": "Volunteer Player Development Coordinator"
+  },
+  {
+    "coachName": "James Frazier",
+    "Title": "Director of Strength & Conditioning",
+    "Email": "frazier@fas.harvard.edu",
+    "Phone": "(617) 496-6803"
+  }
+]
