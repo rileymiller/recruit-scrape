@@ -1,0 +1,70 @@
+[
+  {
+    "coachName": "Gregg Brandon",
+    "Title": "Head Coach",
+    "Email": "gbrandon@mines.edu",
+    "Phone": "303-273-3365",
+    "Alma Mater": "Northern Colorado, 1978",
+    "Twitter": "@greggbrandon1"
+  },
+  {
+    "coachName": "Clement Grinstead",
+    "Title": "Associate Head Coach/Running Backs/Special Teams Coordinator",
+    "Email": "cgrinste@mines.edu",
+    "Phone": "303-384-2511",
+    "Alma Mater": "Coe, 1995",
+    "Twitter": "@CGrinsteadCSM"
+  },
+  {
+    "coachName": "Pete Sterbick",
+    "Title": "Offensive Coordinator",
+    "Email": "sterbick@mines.edu",
+    "Phone": "303-273-3159"
+  },
+  {
+    "coachName": "Brandon Moore",
+    "Title": "Defensive Coordinator/Linebackers Coach",
+    "Email": "btmoore@mines.edu",
+    "Phone": "303-384-2296"
+  },
+  {
+    "coachName": "Tim Brandon",
+    "Title": "Offensive Line Coach",
+    "Email": "tbrandon@mines.edu",
+    "Phone": "303-384-2294"
+  },
+  {
+    "coachName": "Anthony Makransky",
+    "Title": "Defensive Backs",
+    "Email": "amakransky@mines.edu",
+    "Phone": "303-384-2320"
+  },
+  {
+    "coachName": "Scott Groner",
+    "Title": "Director of Equipment",
+    "Email": "sgroner@mines.edu",
+    "Phone": "303-273-3373"
+  },
+  {
+    "coachName": "Tripp Thomas",
+    "Title": "Defensive Line Coach",
+    "Email": "nvthomas@mines.edu",
+    "Phone": "303-273-3444"
+  },
+  {
+    "coachName": "Ryan Diedrick",
+    "Title": "Wide Receivers/Tight Ends Coach",
+    "Email": "ryandiedrick@mines.edu",
+    "Phone": "303-384-2502"
+  },
+  {
+    "coachName": "Nate Renfrew '20",
+    "Title": "Defensive Assistant",
+    "Email": "ntrenfrew@mymail.mines.edu"
+  },
+  {
+    "coachName": "Sean O'Dell '19",
+    "Title": "Offensive Assistant",
+    "Email": "sodell@mymail.mines.edu"
+  }
+]
