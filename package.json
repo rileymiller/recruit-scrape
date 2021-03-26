@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "cypress": "cypress"
+    "cy:open": "cypress open --config-file config/cypress.json",
+    "cy:run": "cypress run --config-file config/cypress.json",
+    "cy:mines": "./scripts/cypress/runScrape.sh --config-file config/mines.json"
   },
   "author": "Riley Miller",
   "license": "ISC",

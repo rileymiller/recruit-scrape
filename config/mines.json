@@ -1,8 +1,10 @@
 {
   "supportFile": "cypress/support/index.ts",
   "pluginsFile": "cypress/plugins/index.ts",
+  "integrationFolder": "cypress/integration/d2/rmac/mines",
+  "testFiles": "**/softball.ts",
   "env": {
-    "write_images": true,
+    "write_images": false,
     "update_snapshots": false
   }
 }
