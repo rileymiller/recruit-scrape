@@ -7,7 +7,8 @@
     "test": "test",
     "cy:open": "cypress open --config-file config/cypress.json",
     "cy:run": "cypress run --config-file config/cypress.json",
-    "cy:mines": "./scripts/cypress/runScrape.sh --config-file config/mines.json"
+    "cy:mines": "./scripts/cypress/runScrape.sh --config-file config/mines.json",
+    "cy:harvard": "./scripts/cypress/runScrape.sh --config-file config/harvard.json"
   },
   "author": "Riley Miller",
   "license": "ISC",

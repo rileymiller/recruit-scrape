@@ -6,7 +6,7 @@ STARTTIME=$(date +%s)
 
 echo "Cleaning Workspace"
 
-rm -r build/
+rm -rf build/
 
 mkdir -p build
 

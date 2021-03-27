@@ -6,8 +6,8 @@ const plugins = (on, config) => {
     console.log(details) // print all details to terminal
     const { name } = details
 
-    const dir = name.substr(0, name.lastIndexOf(`/`))
-    const coachName = name.substr(name.lastIndexOf(`/`))
+    const dir = name?.substr(0, name.lastIndexOf(`/`))
+    const coachName = name?.substr(name.lastIndexOf(`/`) + 1)
     console.log(`${dir}`)
     console.log(`coachName: ${coachName}`)
 

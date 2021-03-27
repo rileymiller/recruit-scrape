@@ -1,0 +1,15 @@
+[
+  {
+    "coachName": "Tyler Kimble",
+    "Title": "Head Coach",
+    "Email": "tkimble@mines.edu",
+    "Phone": "303-273-3527"
+  },
+  {
+    "coachName": "Chuck Canepa",
+    "Title": "Assistant Coach",
+    "Email": "cjcanepa@aol.com",
+    "Phone": "303-273-3527",
+    "Alma Mater": "Colorado State, 1973"
+  }
+]

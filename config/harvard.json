@@ -1,7 +1,7 @@
 {
   "supportFile": "cypress/support/index.ts",
   "pluginsFile": "cypress/plugins/index.ts",
-  "integrationFolder": "cypress/integration/d2/rmac/mines",
+  "integrationFolder": "cypress/integration/d1/ivy/harvard",
   "testFiles": "**/*.ts",
   "env": {
     "write_images": true,

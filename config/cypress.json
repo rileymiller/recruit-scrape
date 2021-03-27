@@ -2,7 +2,7 @@
   "supportFile": "cypress/support/index.ts",
   "pluginsFile": "cypress/plugins/index.ts",
   "env": {
-    "write_images": false,
-    "update_snapshots": true
+    "write_images": true,
+    "update_snapshots": false
   }
 }
