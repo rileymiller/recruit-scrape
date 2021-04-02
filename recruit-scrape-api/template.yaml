@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  recruit-scrape
+
+Globals:
+  Function:
+    # Layers:
+    # Our own layer that we are going to build
+    # - !Ref RuntimeDependenciesLayer
+    # At the same time we can also reference third-party layers
+    # - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:464622532012:layer:Datadog-Node14-x:48"
+    Runtime: nodejs12.x
+    MemorySize: 128
+    Timeout: 100
+
+Resources:
+  CoachScrapeApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "CoachScrapeApi"
+      StageName: !Sub "Prod"
+      Cors: "'*'"
+
+  UploadCoachImageUploadLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/handlers/coach-image-upload.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 60
+      Events:
+        UploadCoachImageAPI:
+          Type: Api
+          Properties:
+            Path: /coach/upload/image
+            Method: POST
+            RestApiId: !Ref CoachScrapeApi
+
+  CoachScrapeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "coach-scrape-bucket-${AWS::AccountId}"
+
+Outputs:
+  CoachScrapeAPIendpoint:
+    Description: "Rest API endpoint URL, this is the url for the Coach Scrape service."
+    Value: !Sub "https://${CoachScrapeApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+  CoachScrapeBucketName:
+    Description: "S3 bucket for application uploads"
+    Value: !Ref "CoachScrapeBucket"

@@ -3,3 +3,5 @@ node_modules/
 cypress/screenshots/
 cypress/videos/
 build/
+recruit-scrape-api/node_modules/
+recruit-scrape-api/dist/

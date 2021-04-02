@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "coach-scrape"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-5gg8p7vuph97"
+s3_prefix = "coach-scrape"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
