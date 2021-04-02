@@ -41,3 +41,6 @@ walk(`${process.cwd()}/build`, (err, results) => {
 
   console.log(results)
 })
+
+
+// TODO: Upload Image to
