@@ -3,6 +3,6 @@
   "pluginsFile": "cypress/plugins/index.ts",
   "env": {
     "write_images": true,
-    "update_snapshots": false
+    "update_snapshots": true
   }
 }

@@ -1,5 +1,3 @@
-import * as fs from 'fs'
-
 type ScrapeConfig = {
   url: string
   division: string
@@ -9,6 +7,9 @@ type ScrapeConfig = {
   sport: string
   path: string
 }
+
+export const MAX_COACHES = 15
+
 /**
  * Function to scrape a sidearm sports coaches page
  * 
@@ -37,8 +38,13 @@ export const ScrapeCoaches = (config: ScrapeConfig) => {
         $body.find(`.img_ad`).css('display', 'none')
       })
 
+    if (!el.length) throw Error('Could not find number of coaches')
+
+    const numCoaches = (el.length < MAX_COACHES) ? el.length : MAX_COACHES
+
+    cy.log(`Collecting ${numCoaches} coaches`)
     // Loop through all of the coaches
-    for (let i = 0; i < el.length; i++) {
+    for (let i = 0; i < numCoaches; i++) {
       let coachDTO = {}
 
       cy.get('.sidearm-coaches-coach').eq(i).then(el => {
@@ -66,12 +72,8 @@ export const ScrapeCoaches = (config: ScrapeConfig) => {
                 // synchronously query from body
                 // to check if the coach has an image
                 if ($body.find('.sidearm-coach-bio-image > img').length) {
+                  // cy.wait(1000)
 
-                  // Remove some obfuscating elements
-                  $body.find('nav').css('display', 'none')
-                  $body.find('.main-header').css('display', 'none')
-                  $body.find('.sidearm-alerts').css('display', 'none')
-                  $body.find(`#google_image_div`).css('display', 'none')
 
                   // Remove whitespace from the coach's name for the image file path
                   const formattedCoachName = coachName.replace(/\s/g, "")
@@ -79,9 +81,18 @@ export const ScrapeCoaches = (config: ScrapeConfig) => {
 
                   const screenshotPath = `${division}/${conference}/${school}/${gender}/${sport}/${formattedCoachName}`
 
-                  // image was found, take a screenshot
+                  // Remove some obfuscating elements
+                  $body.find('nav').remove()
+                  $body.find('.main-header').remove()
+                  $body.find('.sidearm-alerts').remove()
+                  $body.find('#sidearm-alerts').remove()
+                  $body.find(`#google_image_div`).remove()
+                  $body.find('alerts-component').remove()
+
+                  // Take a screenshot of the coach's headshot
                   cy.get(`.sidearm-coach-bio-image > img`).should(`be.visible`).screenshot(screenshotPath, { scale: false })
 
+                  // grab the path to the coach's screenshot
                   coachDTO = {
                     ...coachDTO,
                     imagePath: `${imagePath}.png`

@@ -1,0 +1,24 @@
+[
+  {
+    "coachName": "Matt Hammer",
+    "Title": "Head Men's Basketball Coach",
+    "Email": "matthew.hammer@csupueblo.edu",
+    "Phone": "(719) 549-2545"
+  },
+  {
+    "coachName": "Matt Glover",
+    "Title": "Assistant Coach",
+    "Email": "matthew.glover@csupueblo.edu",
+    "Phone": "(719) 549-2254"
+  },
+  {
+    "coachName": "Tate Hilgenkamp",
+    "Title": "Assistant Coach",
+    "Email": "tate.hilgenkamp@csupueblo.edu"
+  },
+  {
+    "coachName": "Evan Kihn",
+    "Title": "Graduate Assistant Coach",
+    "Email": "em.kihn@pack.csupueblo.edu"
+  }
+]

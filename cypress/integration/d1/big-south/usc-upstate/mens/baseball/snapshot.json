@@ -1,0 +1,25 @@
+[
+  {
+    "coachName": "Mike McGuire",
+    "Title": "Head Coach",
+    "Email": "mikemcguire@uscupstate.edu",
+    "Phone": "864-503-5135"
+  },
+  {
+    "coachName": "Adam Brown",
+    "Title": "Associate Head Coach/Recruiting Coordinator",
+    "Email": "adambrown@uscupstate.edu",
+    "Phone": "864-503-5176"
+  },
+  {
+    "coachName": "Kane Sweeney",
+    "Title": "Assistant Coach",
+    "Email": "ksweeney@uscupstate.edu",
+    "Phone": "864-503-5164"
+  },
+  {
+    "coachName": "Patrick McGuff",
+    "Title": "Volunteer Assistant Coach",
+    "Email": "PATMCGUFF@USCUPSTATE.EDU"
+  }
+]
