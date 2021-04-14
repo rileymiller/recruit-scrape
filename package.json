@@ -18,9 +18,13 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/uuid": "^8.3.0",
+    "axios": "^0.21.1",
     "cypress": "^6.8.0",
     "fs": "0.0.1-security",
     "path": "^0.12.7",
-    "ts-node": "^9.1.1"
+    "ts-node": "^9.1.1",
+    "uuid": "^8.3.2"
   }
 }
