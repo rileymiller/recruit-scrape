@@ -22,6 +22,10 @@ Resources:
       StageName: !Sub "Prod"
       Cors: "'*'"
 
+  CoachScrapeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "coach-scrape-bucket-${AWS::AccountId}"
   UploadCoachImageUploadLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -29,6 +33,12 @@ Resources:
       Runtime: nodejs12.x
       MemorySize: 128
       Timeout: 60
+      Environment:
+        Variables:
+          UploadBucket: !Ref CoachScrapeBucket
+      Policies:
+        - S3WritePolicy:
+            BucketName: !Ref CoachScrapeBucket
       Events:
         UploadCoachImageAPI:
           Type: Api
@@ -36,11 +46,6 @@ Resources:
             Path: /coach/upload/image
             Method: POST
             RestApiId: !Ref CoachScrapeApi
-
-  CoachScrapeBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "coach-scrape-bucket-${AWS::AccountId}"
 
 Outputs:
   CoachScrapeAPIendpoint:
