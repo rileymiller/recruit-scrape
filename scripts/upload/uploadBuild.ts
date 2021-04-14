@@ -6,7 +6,9 @@ import { CoachUploadRequestBody } from '../../recruit-scrape-api'
 import { base64_encode } from '../utils/convertToBase64'
 import { v4 as uuid } from 'uuid'
 
-const runID = uuid()
+const RUN_ID = uuid()
+
+// TODO: may not need this anymore
 const walk = (dir, done) => {
   let results = [];
 
@@ -44,6 +46,7 @@ type CoachMetadata = Omit<CoachUploadRequestBody, 'profilePictureBase64'>
 
 const processCoachConfig = (coachConfigPath: string) => {
   try {
+    // TODO: pull this into a function
     const teamPathRoot = coachConfigPath.substr(0, coachConfigPath.lastIndexOf('/') + 1)
 
 
@@ -55,15 +58,16 @@ const processCoachConfig = (coachConfigPath: string) => {
     console.log(`coaches: ${JSON.stringify(coaches)}`)
 
     // need to parse the school and such
-
-
     coaches.map(coach => {
+
+      // TODO: think about what params we want to upload in addition to whatever was scraped
       let uploadParams = {
         ...coach,
         school: `Mines`,
-        runID
+        runID: RUN_ID
       }
 
+      // TODO: expand this as part of the migration from uploadImage => uploadCoach
       if (coach.hasOwnProperty('imagePath')) {
         const absoluteImagePath = teamPathRoot + coach.imagePath
         console.log(`absoluteImagePath: ${absoluteImagePath}`)
@@ -82,11 +86,10 @@ const processCoachConfig = (coachConfigPath: string) => {
 
   } catch (e) {
     console.error(e)
-    // console.error(`Error trying to read ${coachConfigPath}, e: ${JSON.stringify(e)}`)
   }
 }
 
-
+// TODO: there's probably an easier way to do this since we only care about the coaches.json files.
 walk(`${process.cwd()}/build`, (err, results) => {
   if (err) {
     throw err
@@ -103,6 +106,22 @@ walk(`${process.cwd()}/build`, (err, results) => {
 
 const readAPIConfig = () => ({ uploadEndpoint: config.api?.uploadEndpoint })
 
+/**
+ * Need to refactor this from uploadImage -> uploadCoach.
+ * 
+ * As part of this function, we will want to upload any of the metadata scraped from the coach bio.
+ * This means we'll need to expand the API to not care about which parameters are passed in,
+ * but if an image is uploaded with the coach's metadata, we'll upload the image to s3 and store the link as part of 
+ * the coaches entry in Dynamo.
+ * 
+ * Need to do some investigation around how we want to keep track of independent entries. The flow I'm envisioning will have a PROD
+ * DDB instance that will require manual approval to add/delete an entry from that database. However, this scrape flow should upload
+ * any coaches that failed into the staging DDB table and give some type of signal that an entry has been changed or doesn't exist
+ * yet.
+ * 
+ * @param imagePath 
+ * @param requestParams 
+ */
 const uploadImage = async (imagePath, requestParams: CoachMetadata) => {
   console.log(`uploading image with imagePath: ${imagePath} and requestParams: ${JSON.stringify(requestParams)}`)
 
@@ -122,12 +141,14 @@ const uploadImage = async (imagePath, requestParams: CoachMetadata) => {
   try {
     const uploadResponse = await axios.post(uploadEndpoint, params)
 
+    // TODO: DRY up the axios response handling
     if (uploadResponse.data) {
       console.log(uploadResponse.data)
     } else {
       console.log(uploadResponse)
     }
   } catch (e) {
+    // TODO: DRY up the axios response handling
     if (e.response?.statusCode > 399) {
       console.error(`Request error, status code: ${e.response?.statusCode}`)
     }
