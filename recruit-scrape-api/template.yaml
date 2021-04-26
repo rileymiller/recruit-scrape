@@ -29,7 +29,7 @@ Resources:
   UploadCoachImageUploadLambda:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/handlers/coach-image-upload.handler
+      Handler: dist/handlers/coach-upload.handler
       Runtime: nodejs12.x
       MemorySize: 128
       Timeout: 60
@@ -43,7 +43,7 @@ Resources:
         UploadCoachImageAPI:
           Type: Api
           Properties:
-            Path: /coach/upload/image
+            Path: /coach/upload
             Method: POST
             RestApiId: !Ref CoachScrapeApi
 
