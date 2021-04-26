@@ -42,22 +42,33 @@ const walk = (dir, done) => {
   });
 };
 
+// TODO: there's probably an easier way to do this since we only care about the coaches.json files.
+walk(`${process.cwd()}/build`, (err, results) => {
+  if (err) {
+    throw err
+  }
+
+  const coachConfigs = results.filter((file: string) => file.substr(file.lastIndexOf('/')) === '/coaches.json')
+
+  console.log(coachConfigs)
+
+  coachConfigs.map(coachConfigFile => processCoachConfig(coachConfigFile))
+})
+
 type CoachMetadata = Omit<CoachUploadRequestBody, 'profilePictureBase64'>
 
 const processCoachConfig = (coachConfigPath: string) => {
   try {
-    // TODO: pull this into a function
-    const teamPathRoot = coachConfigPath.substr(0, coachConfigPath.lastIndexOf('/') + 1)
-
+    const teamPathRoot = getTeamFilePath(coachConfigPath)
 
     const rawCoachData = fs.readFileSync(coachConfigPath).toString()
+
     const coaches: any[] = JSON.parse(rawCoachData)
 
     console.log(`teamPathRoot: ${teamPathRoot}`)
 
     console.log(`coaches: ${JSON.stringify(coaches)}`)
 
-    // need to parse the school and such
     coaches.map(coach => {
 
       // TODO: think about what params we want to upload in addition to whatever was scraped
@@ -80,7 +91,7 @@ const processCoachConfig = (coachConfigPath: string) => {
           ...uploadParams,
           fileName
         }
-        uploadImage(absoluteImagePath, uploadParams)
+        uploadCoach(absoluteImagePath, uploadParams)
       }
     })
 
@@ -89,26 +100,11 @@ const processCoachConfig = (coachConfigPath: string) => {
   }
 }
 
-// TODO: there's probably an easier way to do this since we only care about the coaches.json files.
-walk(`${process.cwd()}/build`, (err, results) => {
-  if (err) {
-    throw err
-  }
-
-  const coachConfigs = results.filter((file: string) => file.substr(file.lastIndexOf('/')) === '/coaches.json')
-
-  console.log(coachConfigs)
-
-  coachConfigs.map(coachConfigFile => processCoachConfig(coachConfigFile))
-})
-
-// TODO: Upload Image to API
+const getTeamFilePath = (configPath: string) => configPath.substr(0, configPath.lastIndexOf('/') + 1)
 
 const readAPIConfig = () => ({ uploadEndpoint: config.api?.uploadEndpoint })
 
 /**
- * Need to refactor this from uploadImage -> uploadCoach.
- * 
  * As part of this function, we will want to upload any of the metadata scraped from the coach bio.
  * This means we'll need to expand the API to not care about which parameters are passed in,
  * but if an image is uploaded with the coach's metadata, we'll upload the image to s3 and store the link as part of 
@@ -122,7 +118,7 @@ const readAPIConfig = () => ({ uploadEndpoint: config.api?.uploadEndpoint })
  * @param imagePath 
  * @param requestParams 
  */
-const uploadImage = async (imagePath, requestParams: CoachMetadata) => {
+const uploadCoach = async (imagePath, requestParams: CoachMetadata) => {
   console.log(`uploading image with imagePath: ${imagePath} and requestParams: ${JSON.stringify(requestParams)}`)
 
   const { uploadEndpoint } = readAPIConfig()
@@ -149,7 +145,7 @@ const uploadImage = async (imagePath, requestParams: CoachMetadata) => {
     }
   } catch (e) {
     // TODO: DRY up the axios response handling
-    if (e.response?.statusCode > 399) {
+    if (e.response?.statusCode > 299) {
       console.error(`Request error, status code: ${e.response?.statusCode}`)
     }
     if (e.response?.data?.message) {

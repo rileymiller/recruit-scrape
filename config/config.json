@@ -1,5 +1,5 @@
 {
     "api": {
-        "uploadEndpoint": "https://5kunjnxaja.execute-api.us-east-1.amazonaws.com/Prod/coach/upload/image"
+        "uploadEndpoint": "https://5kunjnxaja.execute-api.us-east-1.amazonaws.com/Prod/coach/upload"
     }
 }
