@@ -13,7 +13,6 @@ AWS.config.update({ region: process.env.AWS_REGION })
 
 const dynamoClient = new DynamoDB.DocumentClient()
 
-
 const COACH_PROD_TABLE = process.env.CoachProdTable
 
 /**
@@ -51,10 +50,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const metadataUploadParams: CoachMetaDataUploadRequest = getCoachUploadRequest(coachKey, metadata)
 
   try {
-    log(`DEBUG`, `medataUploadParams:${JSON.stringify(metadataUploadParams)}`)
-
     const result = await dynamoClient.put(metadataUploadParams).promise();
 
+    // not the result here will be the attributes on the old item
     log(`DEBUG`, `result: ${JSON.stringify(result)}`)
 
     return successfulDynamoPutResponse({
@@ -72,6 +70,8 @@ type CoachMetaDataUploadRequest = {
     id: string
     [key: string]: any
   }
+  // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#putItem-property put only recognizes 'NONE' | 'ALL_OLD'
+  ReturnValues: 'NONE' | 'ALL_OLD'
 }
 
 type CoachMetadata = { [key: string]: any }
@@ -82,7 +82,8 @@ const getCoachUploadRequest = (coachKey: string, metadata: CoachMetadata): Coach
     Item: {
       id: coachKey,
       ...metadata,
-    }
+    },
+    ReturnValues: 'ALL_OLD'
   }
 )
 

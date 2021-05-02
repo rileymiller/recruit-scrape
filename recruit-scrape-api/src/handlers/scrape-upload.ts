@@ -6,11 +6,9 @@ import { isEmpty } from 'lodash'
 import {
   log,
   badRequestResponse,
-  succesfulS3UploadResponse,
   serverErrorResponse,
   getImageExtAndMimeType,
   decodeImage,
-  succesfulResponse,
   uploadImageToS3
 } from '../utils'
 import { successfulDynamoPutResponse } from '../utils/response-factories'
@@ -77,14 +75,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       }
     }
 
-
-    const result = dynamoClient.get(getItemParams).promise()
+    const result = await dynamoClient.get(getItemParams).promise()
 
     if (isEmpty(result)) {
       log(`INFO`, `response was empty`)
       needsReview = true
     } else {
-      log(`INFO`, `response returned`)
+      log(`INFO`, `response returned: ${result}`)
+
+      // check if the item is the same or if it has changed at all
     }
 
 
@@ -164,7 +163,6 @@ const getCoachUploadRequest = (coachKey: string, metadata: CoachMetadata, needsR
         lastCheckedTime: getCurrentTimeString()
       }
     }
-
 )
 
 const getDynamoUploadKey = (body: CoachUploadRequestBody) => `${body.coachName}-${body.school}`
