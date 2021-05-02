@@ -1,6 +1,8 @@
 import AWS, { S3, DynamoDB } from 'aws-sdk'
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { isEmpty } from 'lodash'
+
 import {
   log,
   badRequestResponse,
@@ -21,6 +23,7 @@ const dynamoClient = new DynamoDB.DocumentClient()
 
 const COACH_IMAGE_UPLOAD_BUCKET = process.env.UploadBucket
 const COACH_SCRAPE_UPLOAD_TABLE = process.env.ScrapeUploadTable
+const COACH_PROD_TABLE = process.env.CoachProdTable
 
 /**
  * The expected request structure of an image upload request object
@@ -56,7 +59,40 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   // pull out filename so it's not upload with the coach metadata
   const { profilePictureBase64, fileName, ...metadata } = body
 
+  const coachKey = getDynamoUploadKey(body)
 
+  let needsReview = false
+  // check if the record exists in COACH_PROD_TABLE
+  // - if it does, compare it with upload fields to see if anything is different
+  //    - if the attributes are different, mark the scrape upload as needs_review
+  //    - else, update the attribute in the scrape table with a timestamp for last_check
+  // - else upload to the scrape table and mark as needs_review
+  try {
+
+    // fetch the item record, nothing should exist at this time
+    const getItemParams = {
+      TableName: COACH_SCRAPE_UPLOAD_TABLE,
+      Key: {
+        id: coachKey
+      }
+    }
+
+
+    const result = dynamoClient.get(getItemParams).promise()
+
+    if (isEmpty(result)) {
+      log(`INFO`, `response was empty`)
+      needsReview = true
+    } else {
+      log(`INFO`, `response returned`)
+    }
+
+
+  } catch (e) {
+    return serverErrorResponse(e)
+  }
+
+  // upload profile image to S3 if it exists
   let imageUploadResponse: S3.ManagedUpload.SendData
   if (profilePictureBase64) {
     let s3CoachUploadRequestParameters: S3CoachUploadRequest
@@ -78,48 +114,54 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
 
 
-  const coachKey = getDynamoUploadKey(body)
   const imageLocation = imageUploadResponse?.Location ? imageUploadResponse?.Location : ''
-  const metadataUploadParams: CoachMetaDataUploadRequest = getCoachUploadRequest(coachKey, metadata, imageLocation)
+  const metadataUploadParams: CoachMetaDataUploadRequest = getCoachUploadRequest(coachKey, metadata, needsReview, imageLocation)
 
   try {
 
     const result = await dynamoClient.put(metadataUploadParams).promise();
 
     return successfulDynamoPutResponse({
-      ...metadata,
-      profilePictureURL: imageLocation
+      ...metadataUploadParams.Item
     })
   } catch (e) {
     return serverErrorResponse(new Error(`Failed to upload metadata to Dynamodb\n${JSON.stringify(e)}`))
   }
 }
 
+const getCurrentTimeString = () => new Date().toISOString()
+
 type CoachMetaDataUploadRequest = {
   TableName: string
   Item: {
     id: string
-    profilePictureURL?: string
     [key: string]: any
+    needsReview: boolean
+    profilePictureURL?: string
+    lastCheckedTime: string
   }
 }
 
 type CoachMetadata = { [key: string]: any }
 
-const getCoachUploadRequest = (coachKey: string, metadata: CoachMetadata, imageLocation?: string): CoachMetaDataUploadRequest => (
+const getCoachUploadRequest = (coachKey: string, metadata: CoachMetadata, needsReview: boolean, imageLocation?: string): CoachMetaDataUploadRequest => (
   imageLocation ? {
     TableName: COACH_SCRAPE_UPLOAD_TABLE,
     Item: {
       id: coachKey,
       ...metadata,
-      profilePictureURL: imageLocation
+      profilePictureURL: imageLocation,
+      needsReview,
+      lastCheckedTime: getCurrentTimeString()
     }
   }
     : {
       TableName: COACH_SCRAPE_UPLOAD_TABLE,
       Item: {
         id: coachKey,
-        ...metadata
+        ...metadata,
+        needsReview,
+        lastCheckedTime: getCurrentTimeString()
       }
     }
 

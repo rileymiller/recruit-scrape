@@ -7,6 +7,7 @@
     "@types/aws-lambda": "^8.10.75",
     "aws-lambda": "^1.0.6",
     "aws-sdk": "^2.878.0",
+    "lodash": "^4.17.21",
     "mime-types": "^2.1.30"
   },
   "devDependencies": {
