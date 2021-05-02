@@ -1,19 +1,26 @@
-import AWS, { S3 } from 'aws-sdk'
+import AWS, { S3, DynamoDB } from 'aws-sdk'
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {
   log,
   badRequestResponse,
   succesfulS3UploadResponse,
+  serverErrorResponse,
   getImageExtAndMimeType,
   decodeImage,
   succesfulResponse,
   uploadImageToS3
 } from '../utils'
+import { successfulDynamoPutResponse } from '../utils/response-factories'
 
 AWS.config.update({ region: process.env.AWS_REGION })
 
 const s3 = new S3()
+const dynamoClient = new DynamoDB.DocumentClient()
+
+
+const COACH_IMAGE_UPLOAD_BUCKET = process.env.UploadBucket
+const COACH_SCRAPE_UPLOAD_TABLE = process.env.ScrapeUploadTable
 
 /**
  * The expected request structure of an image upload request object
@@ -26,11 +33,8 @@ export type CoachUploadRequestBody = {
   profilePictureBase64?: string
 }
 
-const COACH_IMAGE_UPLOAD_BUCKET = process.env.UploadBucket
-
 // Main Lambda entry point
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-
   if (!COACH_IMAGE_UPLOAD_BUCKET) {
     return badRequestResponse(new Error(`S3 Bucket environment variable unset`))
   }
@@ -49,15 +53,79 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return badRequestResponse(e)
   }
 
-  const { profilePictureBase64, ...metadata } = body
+  // pull out filename so it's not upload with the coach metadata
+  const { profilePictureBase64, fileName, ...metadata } = body
 
+
+  let imageUploadResponse: S3.ManagedUpload.SendData
   if (profilePictureBase64) {
-    return await handleImageUpload(body)
-  } else {
-    // TODO-rsm process plain metadata upload
-    return succesfulResponse()
+    let s3CoachUploadRequestParameters: S3CoachUploadRequest
+
+    try {
+      const { profilePictureBase64, fileName, coachName, school, runID } = body
+
+      s3CoachUploadRequestParameters = createS3CoachUploadRequest(profilePictureBase64, fileName, coachName, school, runID)
+    } catch (e) {
+      return badRequestResponse(e)
+    }
+
+    try {
+      imageUploadResponse = await handleImageUpload(s3CoachUploadRequestParameters)
+    } catch (e) {
+      return serverErrorResponse(new Error(`Failed to upload coach profile picture to S3`))
+    }
+  }
+
+
+
+  const coachKey = getDynamoUploadKey(body)
+  const imageLocation = imageUploadResponse?.Location ? imageUploadResponse?.Location : ''
+  const metadataUploadParams: CoachMetaDataUploadRequest = getCoachUploadRequest(coachKey, metadata, imageLocation)
+
+  try {
+
+    const result = await dynamoClient.put(metadataUploadParams).promise();
+
+    return successfulDynamoPutResponse({
+      ...metadata,
+      profilePictureURL: imageLocation
+    })
+  } catch (e) {
+    return serverErrorResponse(new Error(`Failed to upload metadata to Dynamodb\n${JSON.stringify(e)}`))
   }
 }
+
+type CoachMetaDataUploadRequest = {
+  TableName: string
+  Item: {
+    id: string
+    profilePictureURL?: string
+    [key: string]: any
+  }
+}
+
+type CoachMetadata = { [key: string]: any }
+
+const getCoachUploadRequest = (coachKey: string, metadata: CoachMetadata, imageLocation?: string): CoachMetaDataUploadRequest => (
+  imageLocation ? {
+    TableName: COACH_SCRAPE_UPLOAD_TABLE,
+    Item: {
+      id: coachKey,
+      ...metadata,
+      profilePictureURL: imageLocation
+    }
+  }
+    : {
+      TableName: COACH_SCRAPE_UPLOAD_TABLE,
+      Item: {
+        id: coachKey,
+        ...metadata
+      }
+    }
+
+)
+
+const getDynamoUploadKey = (body: CoachUploadRequestBody) => `${body.coachName}-${body.school}`
 
 const validateCoachUploadRequestBody = (body: CoachUploadRequestBody) => {
   const { coachName, school, runID } = body
@@ -75,18 +143,19 @@ const validateCoachUploadRequestBody = (body: CoachUploadRequestBody) => {
   }
 }
 
-const handleImageUpload = async (body: CoachUploadRequestBody) => {
-  const { profilePictureBase64, fileName, coachName, school, runID } = body
+const handleImageUpload = async (s3CoachUploadRequestParameters: S3CoachUploadRequest) => {
 
-  try {
-    const s3CoachUploadRequestParameters = createS3CoachUploadRequest(profilePictureBase64, fileName, coachName, school, runID)
+  const s3UploadResponse = await uploadImageToS3(s3, s3CoachUploadRequestParameters)
 
-    const s3UploadResponse = await uploadImageToS3(s3, s3CoachUploadRequestParameters)
+  return s3UploadResponse
+}
 
-    return succesfulS3UploadResponse(s3UploadResponse)
-  } catch (e) {
-    return badRequestResponse(e)
-  }
+type S3CoachUploadRequest = {
+  Body: Buffer
+  Bucket: string
+  ContentType: string
+  Key: string
+  ACL: string
 }
 
 const createS3CoachUploadRequest = (
@@ -95,7 +164,7 @@ const createS3CoachUploadRequest = (
   coachName: string,
   school: string,
   runID: string
-) => {
+): S3CoachUploadRequest => {
   let { imageExtension, imageMimeType } = getImageExtAndMimeType(fileName)
 
   const Key = constructS3UploadKey(coachName, school, runID, imageExtension)

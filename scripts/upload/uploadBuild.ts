@@ -57,33 +57,49 @@ walk(`${process.cwd()}/build`, (err, results) => {
 
 type CoachMetadata = Omit<CoachUploadRequestBody, 'profilePictureBase64'>
 
+type CoachConfig = {
+  metadata: any
+  bioImage: any
+}
+type CoachScrapeFileFormat = {
+  division: string,
+  conference: string,
+  school: string,
+  gender: string,
+  sport: string,
+  coaches: CoachConfig[]
+}
 const processCoachConfig = (coachConfigPath: string) => {
   try {
     const teamPathRoot = getTeamFilePath(coachConfigPath)
 
     const rawCoachData = fs.readFileSync(coachConfigPath).toString()
 
-    const coaches: any[] = JSON.parse(rawCoachData)
+    const teamScrape: CoachScrapeFileFormat = JSON.parse(rawCoachData)
 
     console.log(`teamPathRoot: ${teamPathRoot}`)
+
+    const { division, conference, school, gender, sport, coaches } = teamScrape
 
     console.log(`coaches: ${JSON.stringify(coaches)}`)
 
     coaches.map(coach => {
 
-      // TODO: think about what params we want to upload in addition to whatever was scraped
       let uploadParams = {
-        ...coach,
-        school: `Mines`,
+        division,
+        conference,
+        school,
+        gender,
+        sport,
+        ...coach.metadata,
         runID: RUN_ID
       }
 
-      // TODO: expand this as part of the migration from uploadImage => uploadCoach
-      if (coach.hasOwnProperty('imagePath')) {
-        const absoluteImagePath = teamPathRoot + coach.imagePath
+      if (coach.bioImage.hasOwnProperty('imagePath')) {
+        const absoluteImagePath = teamPathRoot + coach.bioImage.imagePath
         console.log(`absoluteImagePath: ${absoluteImagePath}`)
 
-        const fileName = coach.imagePath.substr(coach.imagePath.lastIndexOf('/'))
+        const fileName = coach.bioImage.imagePath.substr(coach.bioImage.imagePath.lastIndexOf('/'))
 
         console.log(`fileName: ${fileName}`)
 
@@ -91,7 +107,10 @@ const processCoachConfig = (coachConfigPath: string) => {
           ...uploadParams,
           fileName
         }
-        uploadCoach(absoluteImagePath, uploadParams)
+        uploadCoach(uploadParams, absoluteImagePath)
+      } else {
+        console.log(`INFO: Just uploading Coach Metadata`)
+        uploadCoach(uploadParams)
       }
     })
 
@@ -118,23 +137,27 @@ const readAPIConfig = () => ({ uploadEndpoint: config.api?.uploadEndpoint })
  * @param imagePath 
  * @param requestParams 
  */
-const uploadCoach = async (imagePath, requestParams: CoachMetadata) => {
+const uploadCoach = async (requestParams: CoachMetadata, imagePath?: string) => {
   console.log(`uploading image with imagePath: ${imagePath} and requestParams: ${JSON.stringify(requestParams)}`)
 
   const { uploadEndpoint } = readAPIConfig()
 
-  if (!imagePath) {
-    throw new Error(`Invalid Image Path`)
+  let params: CoachUploadRequestBody = {
+    ...requestParams
+  }
+  if (imagePath) {
+    const profileImage = base64_encode(imagePath)
+
+    params = {
+      ...params,
+      profilePictureBase64: profileImage
+    }
   }
 
-  const profileImage = base64_encode(imagePath)
-
-  const params: CoachUploadRequestBody = {
-    ...requestParams,
-    profilePictureBase64: profileImage
-  }
 
   try {
+    console.log(`params: ${JSON.stringify(params)}`)
+
     const uploadResponse = await axios.post(uploadEndpoint, params)
 
     // TODO: DRY up the axios response handling

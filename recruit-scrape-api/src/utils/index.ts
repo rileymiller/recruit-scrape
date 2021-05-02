@@ -1,14 +1,15 @@
 import { log } from './logging'
-import { badRequestResponse, succesfulS3UploadResponse, succesfulResponse } from './response-factories'
+import { badRequestResponse, serverErrorResponse, succesfulS3UploadResponse, succesfulResponse } from './response-factories'
 import { getImageExtAndMimeType, getFileExtension, getExtensionAndMimeType, decodeImage, uploadImageToS3 } from './image-helpers'
 export {
-  log,
   badRequestResponse,
-  succesfulS3UploadResponse,
-  succesfulResponse,
-  getImageExtAndMimeType,
-  getFileExtension,
-  getExtensionAndMimeType,
   decodeImage,
+  getExtensionAndMimeType,
+  getFileExtension,
+  getImageExtAndMimeType,
+  log,
+  serverErrorResponse,
+  succesfulResponse,
+  succesfulS3UploadResponse,
   uploadImageToS3
 }

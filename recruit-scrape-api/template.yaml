@@ -26,19 +26,35 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "coach-scrape-bucket-${AWS::AccountId}"
+
+  # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
+  ScrapeUploadTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
   UploadCoachImageUploadLambda:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/handlers/coach-upload.handler
+      Handler: dist/src/handlers/coach-upload.handler
       Runtime: nodejs12.x
       MemorySize: 128
       Timeout: 60
       Environment:
         Variables:
           UploadBucket: !Ref CoachScrapeBucket
+          ScrapeUploadTable: !Ref ScrapeUploadTable
       Policies:
+        # Give Write Access to the CoachScrapeBucket
         - S3WritePolicy:
             BucketName: !Ref CoachScrapeBucket
+        # Give Create/Read/Update/Delete Permissions to the ScrapeUploadTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ScrapeUploadTable
       Events:
         UploadCoachImageAPI:
           Type: Api
