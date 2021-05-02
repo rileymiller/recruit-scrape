@@ -11,67 +11,140 @@ import {
   invalidFileExtensionMock
 } from '../fixtures/coach-upload-request'
 
+import { basicCoachUploadPut } from '../fixtures/coach-upload-dynamo-put-response'
+
 describe('get-signed-url', () => {
   let S3Spy
-  beforeEach(() => {
-    S3Spy = testUtils.mockS3Upload({
-      ETag: 'bleh',
-      Key: 'doge.jpg',
-      Bucket: 'testBucket',
-      Location: 'https://s3bucket.doge.jpg'
-    })
-  });
+  let dynamoSpy
 
 
-
-  it('returns successful response with metadata upload', async () => {
-    // Arrange
-    const event = testUtils.constructAPIGwEvent({}, {
-      method: 'POST',
-      requestContext: genericRequestContext,
-      body: JSON.stringify(validPlainUploadBodyMock)
+  describe(`successful uploads`, () => {
+    beforeEach(() => {
+      S3Spy = testUtils.mockS3Upload({
+        ETag: 'bleh',
+        Key: 'doge.jpg',
+        Bucket: 'testBucket',
+        Location: 'https://s3bucket.doge.jpg'
+      })
     });
 
-    // Act
-    const result = await handler(event);
+    it('returns successful response with metadata upload', async () => {
+      // Arrange
+      dynamoSpy = testUtils.mockDocumentClientPut(basicCoachUploadPut)
+      const event = testUtils.constructAPIGwEvent({}, {
+        method: 'POST',
+        requestContext: genericRequestContext,
+        body: JSON.stringify(validPlainUploadBodyMock)
+      });
 
-    // Assert
-    expect(result).toEqual({
-      statusCode: 200,
-      body: expect.any(String)
-    })
-  });
+      // Act
+      const result = await handler(event);
 
-  it('returns upload URL with valid image upload request', async () => {
-    // Arrange
-    const uploadURL = `https://s3bucket.doge.jpg`
+      console.log(result)
+      // Assert
+      expect(result).toEqual({
+        statusCode: 201,
+        body: expect.any(String)
+      })
 
-    const event = testUtils.constructAPIGwEvent({}, {
-      method: 'POST',
-      requestContext: genericRequestContext,
-      body: JSON.stringify(validImageUploadBodyMock)
+      const { body } = result
+
+      const parsedBody = JSON.parse(body)
+      expect(parsedBody).toEqual({
+        coachName: expect.any(String),
+        school: expect.any(String),
+        runID: expect.any(String),
+        profilePictureURL: ""
+      })
     });
 
-    // Act
-    const result = await handler(event);
+    it('returns upload URL with valid image upload request', async () => {
+      // Arrange
+      const uploadURL = `https://s3bucket.doge.jpg`
+      dynamoSpy = testUtils.mockDocumentClientPut(basicCoachUploadPut)
+      const event = testUtils.constructAPIGwEvent({}, {
+        method: 'POST',
+        requestContext: genericRequestContext,
+        body: JSON.stringify(validImageUploadBodyMock)
+      });
 
-    // Assert
-    expect(S3Spy).toHaveBeenCalledTimes(1)
-    expect(result).toEqual({
-      statusCode: 201,
-      body: expect.any(String)
-    })
+      // Act
+      const result = await handler(event);
 
-    const parsedResultBody = JSON.parse(result.body)
-    expect(parsedResultBody).toEqual({
-      ETag: expect.any(String),
-      Key: expect.any(String),
-      Bucket: expect.any(String),
-      Location: uploadURL
+      // Assert
+      expect(S3Spy).toHaveBeenCalledTimes(1)
+
+      expect(result).toEqual({
+        statusCode: 201,
+        body: expect.any(String)
+      })
+
+      const parsedResultBody = JSON.parse(result.body)
+      console.log(parsedResultBody)
+      expect(parsedResultBody).toEqual({
+        coachName: expect.any(String),
+        school: expect.any(String),
+        runID: expect.any(String),
+        profilePictureURL: uploadURL
+      })
+    });
+  })
+
+  describe(`s3 upload error`, () => {
+    it(`returns a 500 code if there's an error uploading to dynamo`, async () => {
+      dynamoSpy = testUtils.mockDocumentClientPut()
+      S3Spy = testUtils.mockS3UploadError()
+
+      const event = testUtils.constructAPIGwEvent({}, {
+        method: 'POST',
+        requestContext: genericRequestContext,
+        body: JSON.stringify(validImageUploadBodyMock)
+      });
+
+      // Act
+      const result = await handler(event);
+
+      console.log(result)
+      // Assert
+      expect(result).toEqual({
+        statusCode: 500,
+        body: expect.any(String)
+      })
     })
-  });
+  })
+
+  describe(`dynamo upload error`, () => {
+    it(`returns a 500 code if there's an error uploading to dynamo`, async () => {
+      dynamoSpy = testUtils.mockDocumentClientError()
+
+      const event = testUtils.constructAPIGwEvent({}, {
+        method: 'POST',
+        requestContext: genericRequestContext,
+        body: JSON.stringify(validPlainUploadBodyMock)
+      });
+
+      // Act
+      const result = await handler(event);
+
+      console.log(result)
+      // Assert
+      expect(result).toEqual({
+        statusCode: 500,
+        body: expect.any(String)
+      })
+    })
+  })
 
   describe(`request validation`, () => {
+    beforeEach(() => {
+      dynamoSpy = testUtils.mockDocumentClientPut(basicCoachUploadPut)
+      S3Spy = testUtils.mockS3Upload({
+        ETag: 'bleh',
+        Key: 'doge.jpg',
+        Bucket: 'testBucket',
+        Location: 'https://s3bucket.doge.jpg'
+      })
+    })
     it('returns 400 Bad Request with missing file name', async () => {
       // Arrange
       const event = testUtils.constructAPIGwEvent({}, {
