@@ -5,10 +5,10 @@ describe(`PLU Football`, () => {
     ScrapeCoaches({
       url: `https://golutes.com/sports/football/coaches`,
       division: `d3`,
-      conference: `northwest-conference`,
-      school: `plu`,
-      gender: `mens`,
-      sport: `football`,
+      conference: `Northwest Conference`,
+      school: `Pacific Lutheran University (PLU)`,
+      gender: `Mens`,
+      sport: `Football`,
       path: __dirname
     })
   })

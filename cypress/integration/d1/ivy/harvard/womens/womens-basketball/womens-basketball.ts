@@ -5,10 +5,10 @@ describe(`Harvard Women's Basketball`, () => {
     ScrapeCoaches({
       url: `https://gocrimson.com/sports/womens-basketball/coaches`,
       division: `d1`,
-      conference: `ivy`,
-      school: `harvard`,
-      gender: `womens`,
-      sport: `womens-basketball`,
+      conference: `Ivy League`,
+      school: `Harvard`,
+      gender: `Womens`,
+      sport: `Womens Basketball`,
       path: __dirname
     })
   })

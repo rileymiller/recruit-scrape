@@ -5,10 +5,10 @@ describe(`Colorado State-Pueblo Baseball`, () => {
     ScrapeCoaches({
       url: `https://gothunderwolves.com/sports/baseball/coaches`,
       division: `d2`,
-      conference: `rmac`,
-      school: `csup`,
-      gender: `mens`,
-      sport: `baseball`,
+      conference: `RMAC`,
+      school: `Colorado State University-Pueblo (CSUP)`,
+      gender: `Mens`,
+      sport: `Baseball`,
       path: __dirname
     })
   })

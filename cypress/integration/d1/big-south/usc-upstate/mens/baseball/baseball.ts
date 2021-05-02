@@ -5,10 +5,10 @@ describe(`USC Upstate Baseball`, () => {
     ScrapeCoaches({
       url: `https://upstatespartans.com/sports/baseball/coaches`,
       division: `d1`,
-      conference: `big-south`,
-      school: `usc-upstate`,
-      gender: `mens`,
-      sport: `baseball`,
+      conference: `Big South`,
+      school: `USC-Upstate`,
+      gender: `Mens`,
+      sport: `Baseball`,
       path: __dirname
     })
   })

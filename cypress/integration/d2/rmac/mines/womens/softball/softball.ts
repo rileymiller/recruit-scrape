@@ -5,10 +5,10 @@ describe(`Colorado School of Mines`, () => {
     ScrapeCoaches({
       url: `https://minesathletics.com/sports/softball/coaches`,
       division: `d2`,
-      conference: `rmac`,
-      school: `mines`,
-      gender: `womens`,
-      sport: `softball`,
+      conference: `RMAC`,
+      school: `Colorado School of Mines`,
+      gender: `Womens`,
+      sport: `Softball`,
       path: __dirname
     })
   })

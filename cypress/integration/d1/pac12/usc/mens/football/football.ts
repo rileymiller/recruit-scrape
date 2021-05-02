@@ -5,10 +5,10 @@ describe(`USC Football`, () => {
     ScrapeCoaches({
       url: `https://usctrojans.com/sports/football/coaches`,
       division: `d1`,
-      conference: `pac12`,
-      school: `usc`,
-      gender: `mens`,
-      sport: `football`,
+      conference: `Pac-12`,
+      school: `University of Southern California (USC)`,
+      gender: `Mens`,
+      sport: `Football`,
       path: __dirname
     })
   })

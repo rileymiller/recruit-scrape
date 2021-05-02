@@ -5,10 +5,10 @@ describe(`Harvard Football`, () => {
     ScrapeCoaches({
       url: `https://gocrimson.com/sports/football/coaches`,
       division: `d1`,
-      conference: `ivy`,
-      school: `harvard`,
-      gender: `mens`,
-      sport: `football`,
+      conference: `Ivy League`,
+      school: `Harvard`,
+      gender: `Mens`,
+      sport: `Football`,
       path: __dirname
     })
   })
