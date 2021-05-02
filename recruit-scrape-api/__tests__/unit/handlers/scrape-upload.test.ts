@@ -1,6 +1,6 @@
-import testUtils from "../../test-utils"
+import testUtils from "../test-utils"
 
-import { handler } from '../../../../src/handlers/scrape/coach-upload'
+import { handler } from '../../../src/handlers/scrape-upload'
 
 import {
   genericRequestContext,
@@ -9,9 +9,9 @@ import {
   missingFilenameMock,
   missingFileExtensionMock,
   invalidFileExtensionMock
-} from '../../fixtures/coach-upload-request'
+} from '../fixtures/coach-upload-request'
 
-import { basicCoachUploadPut } from '../../fixtures/coach-upload-dynamo-put-response'
+import { basicCoachUploadPut } from '../fixtures/coach-upload-dynamo-put-response'
 
 describe('get-signed-url', () => {
   let S3Spy

@@ -12,8 +12,8 @@ import {
   decodeImage,
   succesfulResponse,
   uploadImageToS3
-} from '../../utils'
-import { successfulDynamoPutResponse } from '../../utils/response-factories'
+} from '../utils'
+import { successfulDynamoPutResponse } from '../utils/response-factories'
 
 AWS.config.update({ region: process.env.AWS_REGION })
 
@@ -71,7 +71,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     // fetch the item record, nothing should exist at this time
     const getItemParams = {
-      TableName: COACH_SCRAPE_UPLOAD_TABLE,
+      TableName: COACH_PROD_TABLE,
       Key: {
         id: coachKey
       }

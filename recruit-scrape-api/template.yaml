@@ -39,7 +39,7 @@ Resources:
   CoachProdUpdateLambda:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/handlers/coaches/update.handler
+      Handler: dist/src/handlers/coach-update.handler
       Runtime: nodejs12.x
       MemorySize: 128
       Timeout: 60
@@ -86,7 +86,7 @@ Resources:
   UploadCoachImageUploadLambda:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/handlers/scrape/coach-upload.handler
+      Handler: dist/src/handlers/scrape-upload.handler
       Runtime: nodejs12.x
       MemorySize: 128
       Timeout: 60
