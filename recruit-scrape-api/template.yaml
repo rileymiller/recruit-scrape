@@ -15,6 +15,52 @@ Globals:
     Timeout: 100
 
 Resources:
+  ####################################################
+  ## Coach Prod API
+  ####################################################
+  CoachProdApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "CoachProdApi"
+      StageName: !Sub "Prod"
+      Cors: "'*'"
+
+  # DynamoDB table to store coach data from web scrape
+  CoachProdTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+
+  CoachProdUpdateLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/src/handlers/coaches/update.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 60
+      Environment:
+        Variables:
+          CoachProdTable: !Ref CoachProdTable
+      Policies:
+        # Give Read Permissions to the CoachTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CoachProdTable
+      Events:
+        UploadCoachImageAPI:
+          Type: Api
+          Properties:
+            Path: /coach
+            Method: POST
+            RestApiId: !Ref CoachProdApi
+  
+  ####################################################
+  ## Coach Scrape Service
+  ####################################################
   CoachScrapeApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -37,20 +83,10 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
-  # DynamoDB table to store coach data from web scrape
-  CoachProdTable:
-    Type: AWS::Serverless::SimpleTable
-    Properties:
-      PrimaryKey:
-        Name: id
-        Type: String
-      ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
   UploadCoachImageUploadLambda:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/handlers/coach-upload.handler
+      Handler: dist/src/handlers/scrape/coach-upload.handler
       Runtime: nodejs12.x
       MemorySize: 128
       Timeout: 60
@@ -67,7 +103,7 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref ScrapeUploadTable
         # Give Read Permissions to the CoachTable
-        - DynamoDBCrudPolicy:
+        - DynamoDBReadPolicy:
             TableName: !Ref CoachProdTable
       Events:
         UploadCoachImageAPI:
@@ -78,8 +114,17 @@ Resources:
             RestApiId: !Ref CoachScrapeApi
 
 Outputs:
+  CoachProdAPIendpoint:
+    Description: "Rest API endpoint URL, this is the url for the Coach Prod service."
+    Value: !Sub "https://${CoachProdApi}.execute-api.${AWS::Region}.amazonaws.com/Prod
+      Endpoints:
+        POST - /coach
+    "
   CoachScrapeAPIendpoint:
-    Description: "Rest API endpoint URL, this is the url for the Coach Scrape service."
+    Description: "Rest API endpoint URL, this is the url for the Coach Scrape service.
+      Endpoints:
+        POST - /coach/upload
+    "
     Value: !Sub "https://${CoachScrapeApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
   CoachScrapeBucketName:
     Description: "S3 bucket for application uploads"

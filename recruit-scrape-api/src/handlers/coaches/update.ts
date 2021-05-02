@@ -12,8 +12,8 @@ import {
   decodeImage,
   succesfulResponse,
   uploadImageToS3
-} from '../utils'
-import { successfulDynamoPutResponse } from '../utils/response-factories'
+} from '../../utils'
+import { successfulDynamoPutResponse } from '../../utils/response-factories'
 
 AWS.config.update({ region: process.env.AWS_REGION })
 
@@ -62,11 +62,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const coachKey = getDynamoUploadKey(body)
 
   let needsReview = false
-  // check if the record exists in COACH_PROD_TABLE
+  // check if the record exists in COACH_PROD_TABLE ✅
   // - if it does, compare it with upload fields to see if anything is different
   //    - if the attributes are different, mark the scrape upload as needs_review
   //    - else, update the attribute in the scrape table with a timestamp for last_check
-  // - else upload to the scrape table and mark as needs_review
+  // - else upload to the scrape table and mark as needs_review ✅
   try {
 
     // fetch the item record, nothing should exist at this time

@@ -1,4 +1,4 @@
-import { CoachUploadRequestBody } from '../../../src/handlers/coach-upload'
+import { CoachUploadRequestBody } from '../../../src/handlers/scrape/coach-upload'
 import { base64EncodeImage } from './convert-to-base-64-fixture'
 
 export const genericRequestContext = {
