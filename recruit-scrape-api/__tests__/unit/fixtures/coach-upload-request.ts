@@ -28,6 +28,14 @@ export const validImageUploadBodyMock: CoachUploadRequestBody = {
   fileName: `coach.jpeg`
 }
 
+export const validImageUploadedBodyMock: CoachUploadRequestBody = {
+  coachName: `Urban Meyer`,
+  school: `Florida University`,
+  Title: `Head Coach`,
+  runID: `abc123`,
+  profilePictureURL: "https://s3.us-east2.com/coach.jpeg",
+}
+
 export const validImageUploadNoTitleBodyMock: CoachUploadRequestBody = {
   coachName: `Urban Meyer`,
   school: `Florida University`,

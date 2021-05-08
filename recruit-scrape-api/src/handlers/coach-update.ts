@@ -23,6 +23,7 @@ export type CoachUploadRequestBody = {
   school: string
   runID: string
   profilePictureURL?: string
+  [key: string]: string
 }
 
 // Main Lambda entry point
@@ -42,7 +43,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return badRequestResponse(e)
   }
 
-  // pull out filename so it's not upload with the coach metadata
   const { ...metadata } = body
 
   const coachKey = getDynamoUploadKey(body)
