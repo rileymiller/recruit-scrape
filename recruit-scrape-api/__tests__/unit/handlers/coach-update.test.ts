@@ -31,7 +31,6 @@ describe('scrape-upload', () => {
       // Act
       const result = await handler(event);
 
-      console.log(result)
       // Assert
       expect(result).toEqual({
         statusCode: 201,
@@ -92,7 +91,6 @@ describe('scrape-upload', () => {
       // Act
       const result = await handler(event);
 
-      console.log(result)
       // Assert
       expect(result).toEqual({
         statusCode: 500,

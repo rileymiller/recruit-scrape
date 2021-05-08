@@ -50,7 +50,6 @@ describe('scrape-upload', () => {
           // Act
           const result = await handler(event);
 
-          console.log(result)
           // Assert
           expect(result).toEqual({
             statusCode: 201,
@@ -94,7 +93,6 @@ describe('scrape-upload', () => {
           })
 
           const parsedResultBody = JSON.parse(result.body)
-          console.log(parsedResultBody)
           expect(parsedResultBody).toEqual({
             id: expect.any(String),
             coachName: expect.any(String),
@@ -126,7 +124,6 @@ describe('scrape-upload', () => {
           // Act
           const result = await handler(event);
 
-          console.log(result)
           // Assert
           expect(result).toEqual({
             statusCode: 201,
@@ -169,7 +166,6 @@ describe('scrape-upload', () => {
           })
 
           const parsedResultBody = JSON.parse(result.body)
-          console.log(parsedResultBody)
           expect(parsedResultBody).toEqual({
             id: expect.any(String),
             coachName: expect.any(String),
@@ -202,7 +198,6 @@ describe('scrape-upload', () => {
         // Act
         const result = await handler(event);
 
-        console.log(result)
         // Assert
         expect(result).toEqual({
           statusCode: 201,
@@ -246,7 +241,6 @@ describe('scrape-upload', () => {
         })
 
         const parsedResultBody = JSON.parse(result.body)
-        console.log(parsedResultBody)
         expect(parsedResultBody).toEqual({
           id: expect.any(String),
           coachName: expect.any(String),
@@ -277,7 +271,6 @@ describe('scrape-upload', () => {
       // Act
       const result = await handler(event);
 
-      console.log(result)
       // Assert
       expect(result).toEqual({
         statusCode: 500,
@@ -300,7 +293,6 @@ describe('scrape-upload', () => {
       // Act
       const result = await handler(event);
 
-      console.log(result)
       // Assert
       expect(result).toEqual({
         statusCode: 500,
@@ -323,7 +315,6 @@ describe('scrape-upload', () => {
       // Act
       const result = await handler(event);
 
-      console.log(result)
       // Assert
       expect(result).toEqual({
         statusCode: 500,
@@ -357,8 +348,6 @@ describe('scrape-upload', () => {
       // Act
       const result = await handler(event);
 
-      console.log(result)
-
       // Assert
       expect(S3Spy).toHaveBeenCalledTimes(0)
       expect(result).toEqual({
@@ -386,8 +375,6 @@ describe('scrape-upload', () => {
       // Act
       const result = await handler(event);
 
-      console.log(result)
-
       // Assert
       expect(S3Spy).toHaveBeenCalledTimes(0)
       expect(result).toEqual({
@@ -414,8 +401,6 @@ describe('scrape-upload', () => {
 
       // Act
       const result = await handler(event);
-
-      console.log(result)
 
       // Assert
       expect(S3Spy).toHaveBeenCalledTimes(0)

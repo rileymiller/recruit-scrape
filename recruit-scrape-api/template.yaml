@@ -58,6 +58,28 @@ Resources:
             Method: POST
             RestApiId: !Ref CoachProdApi
   
+  CoachProdGetLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/src/handlers/coach-get.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 60
+      Environment:
+        Variables:
+          CoachProdTable: !Ref CoachProdTable
+      Policies:
+        # Give Read Permissions to the CoachTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CoachProdTable
+      Events:
+        UploadCoachImageAPI:
+          Type: Api
+          Properties:
+            Path: /coach/{id}
+            Method: GET
+            RestApiId: !Ref CoachProdApi
+  
   ####################################################
   ## Coach Scrape Service
   ####################################################
