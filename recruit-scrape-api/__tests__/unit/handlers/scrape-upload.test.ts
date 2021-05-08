@@ -66,6 +66,7 @@ describe('scrape-upload', () => {
             school: expect.any(String),
             runID: expect.any(String),
             needsReview: true,
+            prodRecordExists: false,
             lastCheckedTime: expect.any(String),
             Title: expect.any(String)
           })
@@ -101,6 +102,7 @@ describe('scrape-upload', () => {
             runID: expect.any(String),
             profilePictureURL: uploadURL,
             needsReview: true,
+            prodRecordExists: false,
             lastCheckedTime: expect.any(String),
             Title: expect.any(String)
           })
@@ -140,6 +142,7 @@ describe('scrape-upload', () => {
             school: expect.any(String),
             runID: expect.any(String),
             needsReview: true,
+            prodRecordExists: true,
             lastCheckedTime: expect.any(String),
           })
         });
@@ -174,6 +177,7 @@ describe('scrape-upload', () => {
             runID: expect.any(String),
             profilePictureURL: uploadURL,
             needsReview: true,
+            prodRecordExists: true,
             lastCheckedTime: expect.any(String),
           })
         });
@@ -214,6 +218,7 @@ describe('scrape-upload', () => {
           school: expect.any(String),
           runID: expect.any(String),
           needsReview: false,
+          prodRecordExists: true,
           lastCheckedTime: expect.any(String),
           Title: expect.any(String)
         })
@@ -249,6 +254,7 @@ describe('scrape-upload', () => {
           runID: expect.any(String),
           profilePictureURL: uploadURL,
           needsReview: false,
+          prodRecordExists: true,
           lastCheckedTime: expect.any(String),
           Title: expect.any(String)
         })

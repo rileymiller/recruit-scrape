@@ -59,12 +59,12 @@ export const successfulDynamoPutResponse = (body) => {
   }
 }
 
-export const succesfulResponse = () => {
+export const succesfulResponse = (body?: any) => {
   log(`INFO`, `Success`)
 
   return {
     statusCode: 200,
-    body: JSON.stringify({
+    body: body ? JSON.stringify(body) : JSON.stringify({
       message: `Success`
     })
   }

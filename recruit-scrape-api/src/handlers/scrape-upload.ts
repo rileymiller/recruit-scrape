@@ -61,7 +61,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const coachKey = getDynamoUploadKey(body)
 
   let needsReview = false
-
+  let prodRecordExists = false
   try {
 
     // fetch the item record
@@ -79,7 +79,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       needsReview = true
     } else {
       log(`INFO`, `response returned: ${JSON.stringify(result)}`)
-
+      prodRecordExists = true
       const { id, profilePictureURL, runID, lastCheckedTime, ...recordMetadata } = result?.Item
 
       // remove the runID field from metadata and avoid block scope conflict
@@ -124,7 +124,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
 
   const imageLocation = imageUploadResponse?.Location ? imageUploadResponse?.Location : ''
-  const metadataUploadParams: CoachMetaDataUploadRequest = getCoachUploadRequest(coachKey, metadata, needsReview, imageLocation)
+  const metadataUploadParams: CoachMetaDataUploadRequest = getCoachUploadRequest(coachKey, metadata, needsReview, prodRecordExists, imageLocation)
 
   try {
 
@@ -153,7 +153,12 @@ type CoachMetaDataUploadRequest = {
 
 type CoachMetadata = { [key: string]: any }
 
-const getCoachUploadRequest = (coachKey: string, metadata: CoachMetadata, needsReview: boolean, imageLocation?: string): CoachMetaDataUploadRequest => (
+const getCoachUploadRequest = (
+  coachKey: string,
+  metadata: CoachMetadata,
+  needsReview: boolean,
+  prodRecordExists: boolean,
+  imageLocation?: string): CoachMetaDataUploadRequest => (
   imageLocation ? {
     TableName: COACH_SCRAPE_UPLOAD_TABLE,
     Item: {
@@ -161,6 +166,7 @@ const getCoachUploadRequest = (coachKey: string, metadata: CoachMetadata, needsR
       ...metadata,
       profilePictureURL: imageLocation,
       needsReview,
+      prodRecordExists,
       lastCheckedTime: getCurrentTimeString()
     }
   }
@@ -170,6 +176,7 @@ const getCoachUploadRequest = (coachKey: string, metadata: CoachMetadata, needsR
         id: coachKey,
         ...metadata,
         needsReview,
+        prodRecordExists,
         lastCheckedTime: getCurrentTimeString()
       }
     }

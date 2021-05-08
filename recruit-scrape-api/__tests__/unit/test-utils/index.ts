@@ -4,6 +4,8 @@ import {
   mockDocumentClientGet,
   mockDocumentClientPutError,
   mockDocumentClientGetError,
+  mockDocumentClientScanError,
+  mockDocumentClientScan
 } from './dynamo-helpers'
 import { constructAPIGwEvent } from './api-gateway-helpers'
 
@@ -14,6 +16,8 @@ export const testUtils = {
   mockDocumentClientGet,
   mockDocumentClientGetError,
   mockDocumentClientPutError,
+  mockDocumentClientScanError,
+  mockDocumentClientScan,
   constructAPIGwEvent
 }
 

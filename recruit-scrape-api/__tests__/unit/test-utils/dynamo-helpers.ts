@@ -1,6 +1,7 @@
 import { DynamoDB } from 'aws-sdk'
 import { basicCoachUploadPut } from '../fixtures/coach-upload-dynamo-put-response'
 import { basicCoachGet } from '../fixtures/coach-upload-dynamo-get-response'
+import { basicCoachReviewScan } from '../fixtures/scrape-dynamo-scan-response'
 
 const mockDate = new Date(1997, 4, 3)
 
@@ -40,6 +41,17 @@ export function mockDocumentClientPut(res: DynamoDB.DocumentClient.PutItemOutput
   return mockDocumentClient
 }
 
+export function mockDocumentClientScan(res: DynamoDB.DocumentClient.ScanOutput = basicCoachReviewScan) {
+  const mockDocumentClient = jest.spyOn(DynamoDB.DocumentClient.prototype, 'scan')
+
+  mockDocumentClient.mockReturnValue({
+    promise: jest.fn().mockImplementationOnce(() => ({ ...res })),
+    ...baseDynamoMock
+  })
+  return mockDocumentClient
+}
+
+
 export function mockDocumentClientGet(res: DynamoDB.DocumentClient.GetItemOutput = basicCoachGet) {
   const mockDocumentClient = jest.spyOn(DynamoDB.DocumentClient.prototype, 'get')
 
@@ -52,6 +64,16 @@ export function mockDocumentClientGet(res: DynamoDB.DocumentClient.GetItemOutput
 
 export function mockDocumentClientPutError() {
   const mockDocumentClient = jest.spyOn(DynamoDB.DocumentClient.prototype, 'put')
+
+  mockDocumentClient.mockReturnValue({
+    promise: jest.fn().mockImplementationOnce(() => { return Promise.reject('error') }),
+    ...baseDynamoMock
+  })
+  return mockDocumentClient
+}
+
+export function mockDocumentClientScanError() {
+  const mockDocumentClient = jest.spyOn(DynamoDB.DocumentClient.prototype, 'scan')
 
   mockDocumentClient.mockReturnValue({
     promise: jest.fn().mockImplementationOnce(() => { return Promise.reject('error') }),
