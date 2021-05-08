@@ -8,7 +8,9 @@ import {
   validImageUploadBodyMock,
   missingFilenameMock,
   missingFileExtensionMock,
-  invalidFileExtensionMock
+  invalidFileExtensionMock,
+  validPlainUploadNoTitleBodyMock,
+  validImageUploadNoTitleBodyMock
 } from '../fixtures/coach-upload-request'
 
 import { basicCoachUploadPut } from '../fixtures/coach-upload-dynamo-put-response'
@@ -35,70 +37,148 @@ describe('scrape-upload', () => {
         dynamoPutSpy = testUtils.mockDocumentClientPut(basicCoachUploadPut)
       })
 
-      it(`returns successful response with new coach upload`, async () => {
-        // Arrange
-        const event = testUtils.constructAPIGwEvent({}, {
-          method: 'POST',
-          requestContext: genericRequestContext,
-          body: JSON.stringify(validPlainUploadBodyMock)
+      describe(`new upload`, () => {
+
+        it(`returns successful response with new coach upload`, async () => {
+          // Arrange
+          const event = testUtils.constructAPIGwEvent({}, {
+            method: 'POST',
+            requestContext: genericRequestContext,
+            body: JSON.stringify(validPlainUploadBodyMock)
+          });
+
+          // Act
+          const result = await handler(event);
+
+          console.log(result)
+          // Assert
+          expect(result).toEqual({
+            statusCode: 201,
+            body: expect.any(String)
+          })
+
+          const { body } = result
+
+          const parsedBody = JSON.parse(body)
+          expect(parsedBody).toEqual({
+            id: expect.any(String),
+            coachName: expect.any(String),
+            school: expect.any(String),
+            runID: expect.any(String),
+            needsReview: true,
+            lastCheckedTime: expect.any(String),
+            Title: expect.any(String)
+          })
         });
 
-        // Act
-        const result = await handler(event);
+        it('returns upload URL with new coach with profile picture upload', async () => {
+          // Arrange
+          const uploadURL = `https://s3bucket.doge.jpg`
 
-        console.log(result)
-        // Assert
-        expect(result).toEqual({
-          statusCode: 201,
-          body: expect.any(String)
+          const event = testUtils.constructAPIGwEvent({}, {
+            method: 'POST',
+            requestContext: genericRequestContext,
+            body: JSON.stringify(validImageUploadBodyMock)
+          });
+
+          // Act
+          const result = await handler(event);
+
+          // Assert
+          expect(S3Spy).toHaveBeenCalledTimes(1)
+
+          expect(result).toEqual({
+            statusCode: 201,
+            body: expect.any(String)
+          })
+
+          const parsedResultBody = JSON.parse(result.body)
+          console.log(parsedResultBody)
+          expect(parsedResultBody).toEqual({
+            id: expect.any(String),
+            coachName: expect.any(String),
+            school: expect.any(String),
+            runID: expect.any(String),
+            profilePictureURL: uploadURL,
+            needsReview: true,
+            lastCheckedTime: expect.any(String),
+            Title: expect.any(String)
+          })
+        });
+      })
+
+      describe(`record changed`, () => {
+        beforeEach(() => {
+          dynamoGetSpy = testUtils.mockDocumentClientGet()
+          dynamoPutSpy = testUtils.mockDocumentClientPut(basicCoachUploadPut)
         })
 
-        const { body } = result
+        it(`returns successful response with new coach upload, request didn't match production record`, async () => {
+          // Arrange
+          const event = testUtils.constructAPIGwEvent({}, {
+            method: 'POST',
+            requestContext: genericRequestContext,
+            body: JSON.stringify(validPlainUploadNoTitleBodyMock)
+          });
 
-        const parsedBody = JSON.parse(body)
-        expect(parsedBody).toEqual({
-          id: expect.any(String),
-          coachName: expect.any(String),
-          school: expect.any(String),
-          runID: expect.any(String),
-          needsReview: true,
-          lastCheckedTime: expect.any(String),
-        })
-      });
+          // Act
+          const result = await handler(event);
 
-      it('returns upload URL with new coach with profile picture upload', async () => {
-        // Arrange
-        const uploadURL = `https://s3bucket.doge.jpg`
+          console.log(result)
+          // Assert
+          expect(result).toEqual({
+            statusCode: 201,
+            body: expect.any(String)
+          })
 
-        const event = testUtils.constructAPIGwEvent({}, {
-          method: 'POST',
-          requestContext: genericRequestContext,
-          body: JSON.stringify(validImageUploadBodyMock)
+          const { body } = result
+
+          const parsedBody = JSON.parse(body)
+          expect(parsedBody).toEqual({
+            id: expect.any(String),
+            coachName: expect.any(String),
+            school: expect.any(String),
+            runID: expect.any(String),
+            needsReview: true,
+            lastCheckedTime: expect.any(String),
+          })
         });
 
-        // Act
-        const result = await handler(event);
+        it(`returns upload URL with new coach with profile picture upload, request didn't production record`, async () => {
+          // Arrange
+          const uploadURL = `https://s3bucket.doge.jpg`
 
-        // Assert
-        expect(S3Spy).toHaveBeenCalledTimes(1)
+          const event = testUtils.constructAPIGwEvent({}, {
+            method: 'POST',
+            requestContext: genericRequestContext,
+            body: JSON.stringify(validImageUploadNoTitleBodyMock)
+          });
 
-        expect(result).toEqual({
-          statusCode: 201,
-          body: expect.any(String)
-        })
+          // Act
+          const result = await handler(event);
 
-        const parsedResultBody = JSON.parse(result.body)
-        console.log(parsedResultBody)
-        expect(parsedResultBody).toEqual({
-          id: expect.any(String),
-          coachName: expect.any(String),
-          school: expect.any(String),
-          runID: expect.any(String),
-          profilePictureURL: uploadURL,
-          needsReview: true,
-          lastCheckedTime: expect.any(String),
-        })
-      });
+          // Assert
+          expect(S3Spy).toHaveBeenCalledTimes(1)
+
+          expect(result).toEqual({
+            statusCode: 201,
+            body: expect.any(String)
+          })
+
+          const parsedResultBody = JSON.parse(result.body)
+          console.log(parsedResultBody)
+          expect(parsedResultBody).toEqual({
+            id: expect.any(String),
+            coachName: expect.any(String),
+            school: expect.any(String),
+            runID: expect.any(String),
+            profilePictureURL: uploadURL,
+            needsReview: true,
+            lastCheckedTime: expect.any(String),
+          })
+        });
+      })
+
     })
 
     describe(`doesn't need review`, () => {
@@ -107,7 +187,7 @@ describe('scrape-upload', () => {
         dynamoPutSpy = testUtils.mockDocumentClientPut(basicCoachUploadPut)
       })
 
-      it(`returns successful response with new coach upload`, async () => {
+      it(`returns successful response with new coach upload, request matched production record`, async () => {
         // Arrange
         const event = testUtils.constructAPIGwEvent({}, {
           method: 'POST',
@@ -135,10 +215,11 @@ describe('scrape-upload', () => {
           runID: expect.any(String),
           needsReview: false,
           lastCheckedTime: expect.any(String),
+          Title: expect.any(String)
         })
       });
 
-      it('returns upload URL with new coach with profile picture upload', async () => {
+      it('returns upload URL with new coach with profile picture upload, request matched production record', async () => {
         // Arrange
         const uploadURL = `https://s3bucket.doge.jpg`
 
@@ -169,6 +250,7 @@ describe('scrape-upload', () => {
           profilePictureURL: uploadURL,
           needsReview: false,
           lastCheckedTime: expect.any(String),
+          Title: expect.any(String)
         })
       });
     })
@@ -193,15 +275,15 @@ describe('scrape-upload', () => {
       // Assert
       expect(result).toEqual({
         statusCode: 500,
-        body: expect.any(String)
+        body: JSON.stringify({ message: `Failed to upload coach profile picture to S3` })
       })
     })
   })
 
-  describe(`dynamo upload error`, () => {
-    it(`returns a 500 code if there's an error uploading to dynamo`, async () => {
-      dynamoGetSpy = testUtils.mockDocumentClientGet()
-      dynamoPutSpy = testUtils.mockDocumentClientError()
+  describe(`dynamo fetch error`, () => {
+    it(`returns a 500 code if there's an error fetching record from dynamo`, async () => {
+      dynamoGetSpy = testUtils.mockDocumentClientGetError()
+      dynamoPutSpy = testUtils.mockDocumentClientPut()
 
       const event = testUtils.constructAPIGwEvent({}, {
         method: 'POST',
@@ -216,7 +298,30 @@ describe('scrape-upload', () => {
       // Assert
       expect(result).toEqual({
         statusCode: 500,
-        body: expect.any(String)
+        body: JSON.stringify({ message: "Failed during Production item fetch" })
+      })
+    })
+  })
+
+  describe(`dynamo upload error`, () => {
+    it(`returns a 500 code if there's an error uploading to dynamo`, async () => {
+      dynamoGetSpy = testUtils.mockDocumentClientGet()
+      dynamoPutSpy = testUtils.mockDocumentClientPutError()
+
+      const event = testUtils.constructAPIGwEvent({}, {
+        method: 'POST',
+        requestContext: genericRequestContext,
+        body: JSON.stringify(validPlainUploadBodyMock)
+      });
+
+      // Act
+      const result = await handler(event);
+
+      console.log(result)
+      // Assert
+      expect(result).toEqual({
+        statusCode: 500,
+        body: JSON.stringify({ message: `Failed to upload metadata to Dynamodb\n\"error\"` })
       })
     })
   })

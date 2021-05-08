@@ -1,7 +1,7 @@
 import AWS, { S3, DynamoDB } from 'aws-sdk'
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { isEmpty } from 'lodash'
+import { isEmpty, isEqual } from 'lodash'
 
 import {
   log,
@@ -32,6 +32,7 @@ export type CoachUploadRequestBody = {
   runID: string
   fileName?: string
   profilePictureBase64?: string
+  [key: string]: string
 }
 
 // Main Lambda entry point
@@ -60,14 +61,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const coachKey = getDynamoUploadKey(body)
 
   let needsReview = false
-  // check if the record exists in COACH_PROD_TABLE ✅
-  // - if it does, compare it with upload fields to see if anything is different
-  //    - if the attributes are different, mark the scrape upload as needs_review
-  //    - else, update the attribute in the scrape table with a timestamp for last_check
-  // - else upload to the scrape table and mark as needs_review ✅
+
   try {
 
-    // fetch the item record, nothing should exist at this time
+    // fetch the item record
     const getItemParams = {
       TableName: COACH_PROD_TABLE,
       Key: {
@@ -81,14 +78,27 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       log(`INFO`, `response was empty`)
       needsReview = true
     } else {
-      log(`INFO`, `response returned: ${result}`)
+      log(`INFO`, `response returned: ${JSON.stringify(result)}`)
 
-      // check if the item is the same or if it has changed at all
+      const { id, profilePictureURL, runID, lastCheckedTime, ...recordMetadata } = result?.Item
+
+      // remove the runID field from metadata and avoid block scope conflict
+      const { ['runID']: metadataRunID, ...requestMetadata } = metadata
+
+      // audit request and record metadata
+      log(`DEBUG`, `requestMetadata: ${JSON.stringify(requestMetadata)}`)
+      log(`DEBUG`, `recordMetadata: ${JSON.stringify(recordMetadata)}`)
+
+      if (isEqual(requestMetadata, recordMetadata)) {
+        log(`INFO`, `production record is equal to record`)
+        needsReview = false
+      } else {
+        log(`INFO`, `production record is not equal to record, marking for review`)
+        needsReview = true
+      }
     }
-
-
   } catch (e) {
-    return serverErrorResponse(e)
+    return serverErrorResponse(new Error(`Failed during Production item fetch`))
   }
 
   // upload profile image to S3 if it exists

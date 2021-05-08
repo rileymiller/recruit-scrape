@@ -50,8 +50,18 @@ export function mockDocumentClientGet(res: DynamoDB.DocumentClient.GetItemOutput
   return mockDocumentClient
 }
 
-export function mockDocumentClientError() {
+export function mockDocumentClientPutError() {
   const mockDocumentClient = jest.spyOn(DynamoDB.DocumentClient.prototype, 'put')
+
+  mockDocumentClient.mockReturnValue({
+    promise: jest.fn().mockImplementationOnce(() => { return Promise.reject('error') }),
+    ...baseDynamoMock
+  })
+  return mockDocumentClient
+}
+
+export function mockDocumentClientGetError() {
+  const mockDocumentClient = jest.spyOn(DynamoDB.DocumentClient.prototype, 'get')
 
   mockDocumentClient.mockReturnValue({
     promise: jest.fn().mockImplementationOnce(() => { return Promise.reject('error') }),

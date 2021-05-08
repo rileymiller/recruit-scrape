@@ -9,10 +9,26 @@ export const genericRequestContext = {
 export const validPlainUploadBodyMock: CoachUploadRequestBody = {
   coachName: `Urban Meyer`,
   school: `Florida University`,
+  Title: `Head Coach`,
+  runID: `abc123`
+}
+
+export const validPlainUploadNoTitleBodyMock: CoachUploadRequestBody = {
+  coachName: `Urban Meyer`,
+  school: `Florida University`,
   runID: `abc123`
 }
 
 export const validImageUploadBodyMock: CoachUploadRequestBody = {
+  coachName: `Urban Meyer`,
+  school: `Florida University`,
+  Title: `Head Coach`,
+  runID: `abc123`,
+  profilePictureBase64: base64EncodeImage(`coach.jpeg`),
+  fileName: `coach.jpeg`
+}
+
+export const validImageUploadNoTitleBodyMock: CoachUploadRequestBody = {
   coachName: `Urban Meyer`,
   school: `Florida University`,
   runID: `abc123`,
