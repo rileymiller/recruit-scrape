@@ -33,7 +33,8 @@ describe('scrape-upload', () => {
       // Assert
       expect(result).toEqual({
         statusCode: 200,
-        body: expect.any(String)
+        body: expect.any(String),
+        headers: expect.any(Object)
       })
 
       const { body } = result

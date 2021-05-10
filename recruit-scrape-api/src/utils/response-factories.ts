@@ -66,6 +66,11 @@ export const succesfulResponse = (body?: any) => {
     statusCode: 200,
     body: body ? JSON.stringify(body) : JSON.stringify({
       message: `Success`
-    })
+    }),
+    headers: {
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "*"
+    }
   }
 }

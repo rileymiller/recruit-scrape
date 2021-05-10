@@ -2,6 +2,7 @@
   "supportFile": "cypress/support/index.ts",
   "pluginsFile": "cypress/plugins/index.ts",
   "integrationFolder": "cypress/integration/d2/rmac/mines",
+  "pageLoadTimeout": 180000,
   "testFiles": "**/*.ts",
   "env": {
     "write_images": true,
