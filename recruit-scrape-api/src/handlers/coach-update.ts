@@ -6,6 +6,7 @@ import {
   log,
   badRequestResponse,
   serverErrorResponse,
+  getCurrentTimeString
 } from '../utils'
 import { successfulDynamoPutResponse } from '../utils/response-factories'
 
@@ -19,9 +20,13 @@ const COACH_PROD_TABLE = process.env.CoachProdTable
  * The expected request structure of an image upload request object
  */
 export type CoachUploadRequestBody = {
+  key: string
   coachName: string
+  conference: string
+  division: string
+  sport: string
+  gender: string
   school: string
-  runID: string
   profilePictureURL?: string
   [key: string]: string
 }
@@ -43,9 +48,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return badRequestResponse(e)
   }
 
-  const { ...metadata } = body
+  const { key, ...metadata } = body
 
-  const coachKey = getDynamoUploadKey(body)
+  const coachKey = key
 
   const metadataUploadParams: CoachMetaDataUploadRequest = getCoachUploadRequest(coachKey, metadata)
 
@@ -82,25 +87,40 @@ const getCoachUploadRequest = (coachKey: string, metadata: CoachMetadata): Coach
     Item: {
       id: coachKey,
       ...metadata,
+      lastUpdated: getCurrentTimeString()
     },
     ReturnValues: 'ALL_OLD'
   }
 )
 
-const getDynamoUploadKey = (body: CoachUploadRequestBody) => `${body.coachName}-${body.school}`
-
 const validateCoachUploadRequestBody = (body: CoachUploadRequestBody) => {
-  const { coachName, school, runID } = body
+  const { key, coachName, division, conference, school, sport, gender } = body
+
+  if (!key) {
+    throw new Error(`key unset in request`)
+  }
 
   if (!coachName) {
     throw new Error(`coachName unset in request`)
+  }
+
+  if (!division) {
+    throw new Error(`division unset in request`)
+  }
+
+  if (!conference) {
+    throw new Error(`conference unset in request`)
   }
 
   if (!school) {
     throw new Error(`school unset in request`)
   }
 
-  if (!runID) {
-    throw new Error(`runID unset in request`)
+  if (!sport) {
+    throw new Error(`sport unset in request`)
+  }
+
+  if (!gender) {
+    throw new Error(`gender unset in request`)
   }
 }

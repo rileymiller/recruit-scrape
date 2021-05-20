@@ -9,7 +9,8 @@ import {
   serverErrorResponse,
   getImageExtAndMimeType,
   decodeImage,
-  uploadImageToS3
+  uploadImageToS3,
+  getCurrentTimeString
 } from '../utils'
 import { successfulDynamoPutResponse } from '../utils/response-factories'
 
@@ -138,7 +139,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 }
 
-const getCurrentTimeString = () => new Date().toISOString()
 
 type CoachMetaDataUploadRequest = {
   TableName: string
